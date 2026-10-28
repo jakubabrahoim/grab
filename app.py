@@ -112,8 +112,11 @@ class QuietLogger:
             self.job["error"] = clean_error(msg)
 
 
+ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
 def clean_error(msg):
-    msg = str(msg).replace("ERROR: ", "")
+    msg = ANSI.sub("", str(msg)).replace("ERROR: ", "").strip()
     if "] " in msg and msg.startswith("["):
         msg = msg.split("] ", 1)[1]
     if ":" in msg and len(msg.split(":", 1)[0]) == 11:  # "<video id>: reason"
@@ -132,6 +135,7 @@ def base_opts(job=None):
         "noprogress": True,
         "logger": QuietLogger(job),
         "js_runtimes": {"node": {}, "deno": {}},
+        "color": {"stdout": "never", "stderr": "never"},
         "retries": 5,
         "fragment_retries": 5,
         "concurrent_fragment_downloads": 4,
